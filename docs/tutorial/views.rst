@@ -12,11 +12,11 @@ Show Entries
 This view shows all the entries stored in the database.  It listens on the
 root of the application and will select title and text from the database.
 The one with the highest id (the newest entry) will be on top.  The rows
-returned from the cursor look a bit like tuples because we are using
+returned from the cursor look a bit like dictionaries because we are using
 the :class:`sqlite3.Row` row factory.
 
-The view function will pass the entries as dictionaries to the
-:file:`show_entries.html` template and return the rendered one::
+The view function will pass the entries to the :file:`show_entries.html`
+template and return the rendered one::
 
     @app.route('/')
     def show_entries():
@@ -95,4 +95,23 @@ if the user was logged in.
         flash('You were logged out')
         return redirect(url_for('show_entries'))
 
+.. admonition:: Security Note
+
+    Passwords should never be stored in plain text in a production 
+    system. This tutorial uses plain text passwords for simplicity. If you 
+    plan to release a project based off this tutorial out into the world, 
+    passwords should be both `hashed and salted`_ before being stored in a 
+    database or file. 
+
+    Fortunately, there are Flask extensions for the purpose of 
+    hashing passwords and verifying passwords against hashes, so adding 
+    this functionality is fairly straight forward. There are also 
+    many general python libraries that can be used for hashing.
+
+    You can find a list of recommended Flask extensions 
+    `here <http://flask.pocoo.org/extensions/>`_
+
+
 Continue with :ref:`tutorial-templates`.
+
+.. _hashed and salted: https://blog.codinghorror.com/youre-probably-storing-passwords-incorrectly/

@@ -24,7 +24,7 @@ the :ref:`tutorial`.  If you don't have that application yet, get the
 sources from `the examples`_.
 
 .. _the examples:
-   https://github.com/mitsuhiko/flask/tree/master/examples/flaskr/
+   https://github.com/pallets/flask/tree/master/examples/flaskr/
 
 The Testing Skeleton
 --------------------
@@ -194,7 +194,7 @@ suite.
 
 
 .. _MiniTwit Example:
-   https://github.com/mitsuhiko/flask/tree/master/examples/minitwit/
+   https://github.com/pallets/flask/tree/master/examples/minitwit/
 
 
 Other Testing Tricks
@@ -223,8 +223,8 @@ there does not seem to be a good way to do that, consider switching to
 application factories (see :ref:`app-factories`).
 
 Note however that if you are using a test request context, the
-:meth:`~flask.Flask.before_request` functions are not automatically called
-same for :meth:`~flask.Flask.after_request` functions.  However
+:meth:`~flask.Flask.before_request` and :meth:`~flask.Flask.after_request`
+functions are not called automatically.  However
 :meth:`~flask.Flask.teardown_request` functions are indeed executed when
 the test request context leaves the ``with`` block.  If you do want the
 :meth:`~flask.Flask.before_request` functions to be called as well, you

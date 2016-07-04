@@ -37,7 +37,6 @@ already established connection::
             g.sqlite_db = connect_db()
         return g.sqlite_db
 
-
 So now we know how to connect, but how do we properly disconnect?  For
 that, Flask provides us with the :meth:`~flask.Flask.teardown_appcontext`
 decorator.  It's executed every time the application context tears down::
@@ -75,4 +74,4 @@ Continue to :ref:`tutorial-dbinit`.
    larger <larger-applications>`, it's a good idea not to.
 
 .. _example source:
-   https://github.com/mitsuhiko/flask/tree/master/examples/flaskr/
+   https://github.com/pallets/flask/tree/master/examples/flaskr/

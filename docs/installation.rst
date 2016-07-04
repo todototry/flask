@@ -116,7 +116,7 @@ it to operate on a git checkout.  Either way, virtualenv is recommended.
 
 Get the git checkout in a new virtualenv and run in development mode::
 
-    $ git clone http://github.com/mitsuhiko/flask.git
+    $ git clone http://github.com/pallets/flask.git
     Initialized empty Git repository in ~/dev/flask/.git/
     $ cd flask
     $ virtualenv venv
@@ -143,8 +143,8 @@ packages you will need are setuptools and pip - these will let you install
 anything else (like virtualenv). Fortunately there are two "bootstrap scripts"
 you can run to install either.
 
-If you don't currently have either, then `get-pip.py` will install both for you
-(you won't need to run ez_setup.py).
+If you don't currently have either, then :file:`get-pip.py` will install both for you
+(you won't need to run :file:`ez_setup.py`).
 
 `get-pip.py`_
 
@@ -162,7 +162,7 @@ and :command:`python` which will run those things, but this might not automatica
 on Windows, because it doesn't know where those executables are (give either a try!).
 
 To fix this, you should be able to navigate to your Python install directory
-(e.g :file:`C:\Python27`), then go to :file:`Tools`, then :file:`Scripts`; then find the
+(e.g :file:`C:\Python27`), then go to :file:`Tools`, then :file:`Scripts`, then find the
 :file:`win_add2path.py` file and run that. Open a **new** Command Prompt and
 check that you can now just type :command:`python` to bring up the interpreter.
 
@@ -172,5 +172,5 @@ Finally, to install `virtualenv`_, you can simply run::
 
 Then you can be off on your way following the installation instructions above.
 
-.. _get-pip.py: https://raw.githubusercontent.com/pypa/pip/master/contrib/get-pip.py
+.. _get-pip.py: https://bootstrap.pypa.io/get-pip.py
 .. _ez_setup.py: https://bitbucket.org/pypa/setuptools/raw/bootstrap/ez_setup.py

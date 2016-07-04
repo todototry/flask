@@ -14,7 +14,7 @@ from threading import Lock
 from datetime import timedelta
 from itertools import chain
 from functools import update_wrapper
-from collections import Mapping, deque
+from collections import deque
 
 from werkzeug.datastructures import ImmutableDict
 from werkzeug.routing import Map, Rule, RequestRedirect, BuildError
@@ -22,7 +22,8 @@ from werkzeug.exceptions import HTTPException, InternalServerError, \
      MethodNotAllowed, BadRequest, default_exceptions
 
 from .helpers import _PackageBoundObject, url_for, get_flashed_messages, \
-     locked_cached_property, _endpoint_from_view_func, find_package
+     locked_cached_property, _endpoint_from_view_func, find_package, \
+     get_debug_flag
 from . import json, cli
 from .wrappers import Request, Response
 from .config import ConfigAttribute, Config
@@ -33,7 +34,7 @@ from .templating import DispatchingJinjaLoader, Environment, \
      _default_template_ctx_processor
 from .signals import request_started, request_finished, got_request_exception, \
      request_tearing_down, appcontext_tearing_down
-from ._compat import reraise, string_types, text_type, integer_types, iterkeys
+from ._compat import reraise, string_types, text_type, integer_types
 
 # a lock used for logger initialization
 _logger_lock = Lock()
@@ -120,7 +121,7 @@ class Flask(_PackageBoundObject):
        The `instance_path` and `instance_relative_config` parameters were
        added.
 
-    .. versionadded:: 1.0
+    .. versionadded:: 0.11
        The `root_path` parameter was added.
 
     :param import_name: the name of the application package
@@ -159,7 +160,7 @@ class Flask(_PackageBoundObject):
 
     #: The class that is used for the Jinja environment.
     #:
-    #: .. versionadded:: 1.0
+    #: .. versionadded:: 0.11
     jinja_environment = Environment
 
     #: The class that is used for the :data:`~flask.g` instance.
@@ -168,7 +169,7 @@ class Flask(_PackageBoundObject):
     #:
     #: 1. Store arbitrary attributes on flask.g.
     #: 2. Add a property for lazy per-request database connectors.
-    #: 3. Return None instead of AttributeError on expected attributes.
+    #: 3. Return None instead of AttributeError on unexpected attributes.
     #: 4. Raise exception if an unexpected attr is set, a "controlled" flask.g.
     #:
     #: In Flask 0.9 this property was called `request_globals_class` but it
@@ -198,7 +199,7 @@ class Flask(_PackageBoundObject):
     #: 1. Default values for certain config options.
     #: 2. Access to config values through attributes in addition to keys.
     #:
-    #: .. versionadded:: 1.0
+    #: .. versionadded:: 0.11
     config_class = Config
 
     #: The debug flag.  Set this to ``True`` to enable debugging of the
@@ -246,6 +247,16 @@ class Flask(_PackageBoundObject):
     permanent_session_lifetime = ConfigAttribute('PERMANENT_SESSION_LIFETIME',
         get_converter=_make_timedelta)
 
+    #: A :class:`~datetime.timedelta` which is used as default cache_timeout
+    #: for the :func:`send_file` functions. The default is 12 hours.
+    #:
+    #: This attribute can also be configured from the config with the
+    #: ``SEND_FILE_MAX_AGE_DEFAULT`` configuration key. This configuration
+    #: variable can also be set with an integer value used as seconds.
+    #: Defaults to ``timedelta(hours=12)``
+    send_file_max_age_default = ConfigAttribute('SEND_FILE_MAX_AGE_DEFAULT',
+        get_converter=_make_timedelta)
+
     #: Enable this if you want to use the X-Sendfile feature.  Keep in
     #: mind that the server has to support this.  This only affects files
     #: sent with the :func:`send_file` method.
@@ -279,7 +290,7 @@ class Flask(_PackageBoundObject):
 
     #: Default configuration parameters.
     default_config = ImmutableDict({
-        'DEBUG':                                False,
+        'DEBUG':                                get_debug_flag(default=False),
         'TESTING':                              False,
         'PROPAGATE_EXCEPTIONS':                 None,
         'PRESERVE_CONTEXT_ON_EXCEPTION':        None,
@@ -297,7 +308,7 @@ class Flask(_PackageBoundObject):
         'SESSION_COOKIE_SECURE':                False,
         'SESSION_REFRESH_EACH_REQUEST':         True,
         'MAX_CONTENT_LENGTH':                   None,
-        'SEND_FILE_MAX_AGE_DEFAULT':            12 * 60 * 60,  # 12 hours
+        'SEND_FILE_MAX_AGE_DEFAULT':            timedelta(hours=12),
         'TRAP_BAD_REQUEST_ERRORS':              False,
         'TRAP_HTTP_EXCEPTIONS':                 False,
         'EXPLAIN_TEMPLATE_LOADING':             False,
@@ -305,6 +316,7 @@ class Flask(_PackageBoundObject):
         'JSON_AS_ASCII':                        True,
         'JSON_SORT_KEYS':                       True,
         'JSONIFY_PRETTYPRINT_REGULAR':          True,
+        'JSONIFY_MIMETYPE':                     'application/json',
         'TEMPLATES_AUTO_RELOAD':                None,
     })
 
@@ -411,9 +423,8 @@ class Flask(_PackageBoundObject):
         #: A dictionary with lists of functions that should be called after
         #: each request.  The key of the dictionary is the name of the blueprint
         #: this function is active for, ``None`` for all requests.  This can for
-        #: example be used to open database connections or getting hold of the
-        #: currently logged in user.  To register a function here, use the
-        #: :meth:`after_request` decorator.
+        #: example be used to close database connections. To register a function
+        #: here, use the :meth:`after_request` decorator.
         self.after_request_funcs = {}
 
         #: A dictionary with lists of functions that are called after
@@ -471,7 +482,7 @@ class Flask(_PackageBoundObject):
         #: A list of shell context processor functions that should be run
         #: when a shell context is created.
         #:
-        #: .. versionadded:: 1.0
+        #: .. versionadded:: 0.11
         self.shell_context_processors = []
 
         #: all the attached blueprints in a dictionary by name.  Blueprints
@@ -536,7 +547,7 @@ class Flask(_PackageBoundObject):
         #: provided by Flask itself and can be overridden.
         #:
         #: This is an instance of a :class:`click.Group` object.
-        self.cli = cli.AppGroup(self)
+        self.cli = cli.AppGroup(self.name)
 
     def _get_error_handlers(self):
         from warnings import warn
@@ -673,7 +684,7 @@ class Flask(_PackageBoundObject):
         this function to customize the behavior.
 
         .. versionadded:: 0.5
-        .. versionchanged:: 1.0
+        .. versionchanged:: 0.11
            ``Environment.auto_reload`` set in accordance with
            ``TEMPLATES_AUTO_RELOAD`` configuration option.
         """
@@ -762,7 +773,7 @@ class Flask(_PackageBoundObject):
         application.  This runs all the registered shell context
         processors.
 
-        .. versionadded:: 1.0
+        .. versionadded:: 0.11
         """
         rv = {'app': self, 'g': g}
         for processor in self.shell_context_processors:
@@ -770,8 +781,13 @@ class Flask(_PackageBoundObject):
         return rv
 
     def run(self, host=None, port=None, debug=None, **options):
-        """Runs the application on a local development server.  If the
-        :attr:`debug` flag is set the server will automatically reload
+        """Runs the application on a local development server.
+
+        Do not use ``run()`` in a production setting. It is not intended to
+        meet security and performance requirements for a production server.
+        Instead, see :ref:`deployment` for WSGI server recommendations.
+
+        If the :attr:`debug` flag is set the server will automatically reload
         for code changes and show a debugger in case an exception happened.
 
         If you want to run the application in debug mode, but disable the
@@ -781,8 +797,7 @@ class Flask(_PackageBoundObject):
 
         It is not recommended to use this function for development with
         automatic reloading as this is badly supported.  Instead you should
-        be using the :command:`flask` command line script's ``runserver``
-        support.
+        be using the :command:`flask` command line script's ``run`` support.
 
         .. admonition:: Keep in Mind
 
@@ -823,6 +838,7 @@ class Flask(_PackageBoundObject):
             self.debug = bool(debug)
         options.setdefault('use_reloader', self.debug)
         options.setdefault('use_debugger', self.debug)
+        options.setdefault('passthrough_errors', True)
         try:
             run_simple(host, port, self, **options)
         finally:
@@ -878,7 +894,7 @@ class Flask(_PackageBoundObject):
            to override the client to be used by setting the
            :attr:`test_client_class` attribute.
 
-        .. versionchanged:: 1.0
+        .. versionchanged:: 0.11
            Added `**kwargs` to support passing additional keyword arguments to
            the constructor of :attr:`test_client_class`.
         """
@@ -939,7 +955,7 @@ class Flask(_PackageBoundObject):
     def iter_blueprints(self):
         """Iterates over all blueprints by the order they were registered.
 
-        .. versionadded:: 1.0
+        .. versionadded:: 0.11
         """
         return iter(self._blueprint_order)
 
@@ -1388,7 +1404,7 @@ class Flask(_PackageBoundObject):
     def shell_context_processor(self, f):
         """Registers a shell context processor function.
 
-        .. versionadded:: 1.0
+        .. versionadded:: 0.11
         """
         self.shell_context_processors.append(f)
         return f
@@ -1788,7 +1804,7 @@ class Flask(_PackageBoundObject):
         if it was the return value from the view and further
         request handling is stopped.
 
-        This also triggers the :meth:`url_value_processor` functions before
+        This also triggers the :meth:`url_value_preprocessor` functions before
         the actual :meth:`before_request` functions are called.
         """
         bp = _request_ctx_stack.top.request.blueprint
