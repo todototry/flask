@@ -13,17 +13,13 @@
          export an FLASKR_SETTINGS environment variable
          pointing to a configuration file.
 
-      2. Instruct flask to use the right application
+      2. initialize the database with this command:
 
-         export FLASK_APP=flaskr
+         flask --app=flaskr initdb
 
-      3. initialize the database with this command:
+      3. now you can run flaskr:
 
-         flask initdb
-
-      4. now you can run flaskr:
-
-         flask run
+         flask --app=flaskr run
 
          the application will greet you on
          http://localhost:5000/

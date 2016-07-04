@@ -90,19 +90,14 @@ Then you can define your central place to combine the views like this::
 You can further optimize this in terms of amount of keystrokes needed to
 write this by having a function that calls into
 :meth:`~flask.Flask.add_url_rule` by prefixing a string with the project
-name and a dot, and by wrapping `view_func` in a `LazyView` as needed.  ::
+name and a dot, and by wrapping `view_func` in a `LazyView` as needed::
 
-    def url(import_name, url_rules=[], **options):
+    def url(url_rule, import_name, **options):
         view = LazyView('yourapplication.' + import_name)
-        for url_rule in url_rules:
-            app.add_url_rule(url_rule, view_func=view, **options)
+        app.add_url_rule(url_rule, view_func=view, **options)
 
-    # add a single route to the index view
-    url('views.index', ['/'])
-
-    # add two routes to a single function endpoint
-    url_rules = ['/user/','/user/<username>']
-    url('views.user', url_rules)
+    url('/', 'views.index')
+    url('/user/<username>', 'views.user')
 
 One thing to keep in mind is that before and after request handlers have
 to be in a file that is imported upfront to work properly on the first

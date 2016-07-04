@@ -174,9 +174,12 @@ def test_templates_and_static(test_apps):
         assert flask.url_for('admin.static', filename='test.txt') == '/admin/static/test.txt'
 
     with app.test_request_context():
-        with pytest.raises(TemplateNotFound) as e:
+        try:
             flask.render_template('missing.html')
-        assert e.value.name == 'missing.html'
+        except TemplateNotFound as e:
+            assert e.name == 'missing.html'
+        else:
+            assert 0, 'expected exception'
 
     with flask.Flask(__name__).test_request_context():
         assert flask.render_template('nested/nested.txt') == 'I\'m nested'

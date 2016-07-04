@@ -41,4 +41,3 @@ Snippet Archives <http://flask.pocoo.org/snippets/>`_.
    methodoverrides
    requestchecksum
    celery
-   subclassing

@@ -113,7 +113,7 @@ class Request(RequestBase):
         is considered to include JSON data if the mimetype is
         :mimetype:`application/json` or :mimetype:`application/*+json`.
 
-        .. versionadded:: 0.11
+        .. versionadded:: 1.0
         """
         mt = self.mimetype
         if mt == 'application/json':
@@ -123,12 +123,11 @@ class Request(RequestBase):
         return False
 
     def get_json(self, force=False, silent=False, cache=True):
-        """Parses the incoming JSON request data and returns it.  By default
-        this function will return ``None`` if the mimetype is not
-        :mimetype:`application/json` but this can be overridden by the
-        ``force`` parameter. If parsing fails the
-        :meth:`on_json_loading_failed` method on the request object will be
-        invoked.
+        """Parses the incoming JSON request data and returns it.  If
+        parsing fails the :meth:`on_json_loading_failed` method on the
+        request object will be invoked.  By default this function will
+        only load the json data if the mimetype is :mimetype:`application/json`
+        but this can be overridden by the `force` parameter.
 
         :param force: if set to ``True`` the mimetype is ignored.
         :param silent: if set to ``True`` this method will fail silently

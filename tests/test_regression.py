@@ -39,7 +39,8 @@ class assert_no_leak(object):
         self.old_objects = len(gc.get_objects())
 
     def __exit__(self, exc_type, exc_value, tb):
-        gc.collect()
+        if not hasattr(sys, 'getrefcount'):
+            gc.collect()
         new_objects = len(gc.get_objects())
         if new_objects > self.old_objects:
             pytest.fail('Example code leaked')

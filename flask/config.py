@@ -143,12 +143,10 @@ class Config(dict):
         -   a string: in this case the object with that name will be imported
         -   an actual object reference: that object is used directly
 
-        Objects are usually either modules or classes. :meth:`from_object`
-        loads only the uppercase attributes of the module/class. A ``dict``
-        object will not work with :meth:`from_object` because the keys of a
-        ``dict`` are not attributes of the ``dict`` class.
+        Objects are usually either modules or classes.
 
-        Example of module-based configuration::
+        Just the uppercase variables in that object are stored in the config.
+        Example usage::
 
             app.config.from_object('yourapplication.default_config')
             from yourapplication import default_config
@@ -158,9 +156,6 @@ class Config(dict):
         rather configuration defaults.  The actual config should be loaded
         with :meth:`from_pyfile` and ideally from a location not within the
         package because the package might be installed system wide.
-
-        See :ref:`config-dev-prod` for an example of class-based configuration
-        using :meth:`from_object`.
 
         :param obj: an import name or object
         """
@@ -181,7 +176,7 @@ class Config(dict):
         :param silent: set to ``True`` if you want silent failure for missing
                        files.
 
-        .. versionadded:: 0.11
+        .. versionadded:: 1.0
         """
         filename = os.path.join(self.root_path, filename)
 
@@ -199,7 +194,7 @@ class Config(dict):
         """Updates the config like :meth:`update` ignoring items with non-upper
         keys.
 
-        .. versionadded:: 0.11
+        .. versionadded:: 1.0
         """
         mappings = []
         if len(mapping) == 1:
@@ -227,7 +222,7 @@ class Config(dict):
             app.config['IMAGE_STORE_BASE_URL'] = 'http://img.website.com'
             image_store_config = app.config.get_namespace('IMAGE_STORE_')
 
-        The resulting dictionary `image_store_config` would look like::
+        The resulting dictionary `image_store` would look like::
 
             {
                 'type': 'fs',
@@ -244,7 +239,7 @@ class Config(dict):
         :param trim_namespace: a flag indicating if the keys of the resulting
                           dictionary should not include the namespace
 
-        .. versionadded:: 0.11
+        .. versionadded:: 1.0
         """
         rv = {}
         for k, v in iteritems(self):

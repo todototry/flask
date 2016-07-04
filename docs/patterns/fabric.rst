@@ -43,25 +43,36 @@ virtual environment::
     env.hosts = ['server1.example.com', 'server2.example.com']
 
     def pack():
-        # build the package
+        # create a new source distribution as tarball
         local('python setup.py sdist --formats=gztar', capture=False)
 
     def deploy():
-        # figure out the package name and version
+        # figure out the release name and version
         dist = local('python setup.py --fullname', capture=True).strip()
-        filename = '%s.tar.gz' % dist
-
-        # upload the package to the temporary folder on the server
-        put('dist/%s' % filename, '/tmp/%s' % filename)
-
-        # install the package in the application's virtualenv with pip
-        run('/var/www/yourapplication/env/bin/pip install /tmp/%s' % filename)
-
-        # remove the uploaded package
-        run('rm -r /tmp/%s' % filename)
-
-        # touch the .wsgi file to trigger a reload in mod_wsgi
+        # upload the source tarball to the temporary folder on the server
+        put('dist/%s.tar.gz' % dist, '/tmp/yourapplication.tar.gz')
+        # create a place where we can unzip the tarball, then enter
+        # that directory and unzip it
+        run('mkdir /tmp/yourapplication')
+        with cd('/tmp/yourapplication'):
+            run('tar xzf /tmp/yourapplication.tar.gz')
+            # now setup the package with our virtual environment's
+            # python interpreter
+            run('/var/www/yourapplication/env/bin/python setup.py install')
+        # now that all is set up, delete the folder again
+        run('rm -rf /tmp/yourapplication /tmp/yourapplication.tar.gz')
+        # and finally touch the .wsgi file so that mod_wsgi triggers
+        # a reload of the application
         run('touch /var/www/yourapplication.wsgi')
+
+The example above is well documented and should be straightforward.  Here
+a recap of the most common commands fabric provides:
+
+-   `run` - executes a command on a remote server
+-   `local` - executes a command on the local machine
+-   `put` - uploads a file to the remote server
+-   `cd` - changes the directory on the serverside.  This has to be used
+    in combination with the ``with`` statement.
 
 Running Fabfiles
 ----------------
@@ -144,7 +155,6 @@ location where it's expected (eg: :file:`/var/www/yourapplication`).
 
 Either way, in our case here we only expect one or two servers and we can
 upload them ahead of time by hand.
-
 
 First Deployment
 ----------------

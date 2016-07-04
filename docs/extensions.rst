@@ -1,5 +1,3 @@
-.. _extensions:
-
 Flask Extensions
 ================
 
@@ -20,17 +18,10 @@ Using Extensions
 Extensions typically have documentation that goes along that shows how to
 use it.  There are no general rules in how extensions are supposed to
 behave but they are imported from common locations.  If you have an
-extension called ``Flask-Foo`` or ``Foo-Flask`` it should be always
-importable from ``flask_foo``::
+extension called ``Flask-Foo`` or ``Foo-Flask`` it will be always
+importable from ``flask.ext.foo``::
 
-    import flask_foo
-
-Building Extensions
--------------------
-
-While `Flask Extension Registry`_ contains many Flask extensions, you may not find
-an extension that fits your need. If this is the case, you can always create your own. 
-Consider reading :ref:`extension-dev` to develop your own Flask extension.
+    from flask.ext import foo
 
 Flask Before 0.8
 ----------------
@@ -53,6 +44,5 @@ And here is how you can use it::
 Once the ``flaskext_compat`` module is activated the :data:`flask.ext` will
 exist and you can start importing from there.
 
-
 .. _Flask Extension Registry: http://flask.pocoo.org/extensions/
-.. _flaskext_compat.py: https://raw.githubusercontent.com/pallets/flask/master/scripts/flaskext_compat.py
+.. _flaskext_compat.py: https://raw.githubusercontent.com/mitsuhiko/flask/master/scripts/flaskext_compat.py

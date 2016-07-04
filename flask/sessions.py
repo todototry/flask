@@ -17,9 +17,12 @@ from werkzeug.http import http_date, parse_date
 from werkzeug.datastructures import CallbackDict
 from . import Markup, json
 from ._compat import iteritems, text_type
-from .helpers import total_seconds
 
 from itsdangerous import URLSafeTimedSerializer, BadSignature
+
+
+def total_seconds(td):
+    return td.days * 60 * 60 * 24 + td.seconds
 
 
 class SessionMixin(object):
@@ -263,7 +266,7 @@ class SessionInterface(object):
 
         This check is usually skipped if sessions get deleted.
 
-        .. versionadded:: 0.11
+        .. versionadded:: 1.0
         """
         if session.modified:
             return True
